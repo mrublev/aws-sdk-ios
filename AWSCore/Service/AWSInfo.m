@@ -78,9 +78,7 @@ static NSString *const AWSInfoIdentityManager = @"IdentityManager";
             _rootInfoDictionary = [[[NSBundle mainBundle] infoDictionary] objectForKey:AWSInfoRoot];
         }
         
-        [self setGlobalUserAgentFromConfig:_rootInfoDictionary];
-        _defaultCognitoCredentialsProvider = [self cognitoCredentialsProviderFromConfig:_rootInfoDictionary];
-        _defaultRegion = [self regionFromConfig:_rootInfoDictionary];
+        [self updateWithConfig:_rootInfoDictionary];
     }
     
     return self;
@@ -98,7 +96,7 @@ static NSString *const AWSInfoIdentityManager = @"IdentityManager";
     if (cognitoIdentityPoolID && cognitoIdentityRegion != AWSRegionUnknown) {
         return [[AWSCognitoCredentialsProvider alloc] initWithRegionType:cognitoIdentityRegion identityPoolId:cognitoIdentityPoolID];
     }
-    return nil
+    return nil;
 }
 
 - (void)setGlobalUserAgentFromConfig:(NSDictionary *)config {
@@ -120,6 +118,13 @@ static NSString *const AWSInfoIdentityManager = @"IdentityManager";
 
 + (void)overrideCredentialsProvider:(AWSCognitoCredentialsProvider *)cognitoCredentialsProvider {
     AWSInfo.defaultAWSInfo.defaultCognitoCredentialsProvider = cognitoCredentialsProvider;
+}
+
+- (void)updateWithConfig:(NSDictionary<NSString *, id> *)config {
+    _rootInfoDictionary = config;
+    [self setGlobalUserAgentFromConfig:config];
+    _defaultCognitoCredentialsProvider = [self cognitoCredentialsProviderFromConfig:config];
+    _defaultRegion = [self regionFromConfig:config];
 }
 
 - (AWSServiceInfo *)serviceInfo:(NSString *)serviceName
